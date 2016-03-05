@@ -28,8 +28,8 @@ var assert = require('assert')
     , D3Matrix = require('../lib/d3matrix.js');
 
 describe('D3Matrix', function() {
-    context('when create D3Matrix with N is equal -999', function () {
-        it("should throw error with message 'N is a number between 1 and 100'.", function () {
+    context('when create D3Matrix with N is number not between  1 and 100', function () {
+        it("if N is -999 should throw error with message 'N is a number between 1 and 100'.", function () {
             var message = '';
             try{
                 let obj = new D3Matrix(-999);
@@ -38,9 +38,7 @@ describe('D3Matrix', function() {
             }
             assert.equal('N is a number between 1 and 100', message);
         });
-    });
-    context('when create D3Matrix with N is equal 0', function () {
-        it("should throw error with message 'N is a number between 1 and 100'.", function () {
+        it("if N is 0 should throw error with message 'N is a number between 1 and 100'.", function () {
             var message = '';
             try{
                 let obj = new D3Matrix(0);
@@ -49,9 +47,7 @@ describe('D3Matrix', function() {
             }
             assert.equal('N is a number between 1 and 100', message);
         });
-    });
-    context('when create D3Matrix with N is equal 999', function () {
-        it("should throw error with message 'N is a number between 1 and 100'.", function () {
+        it("if N is 999 should throw error with message 'N is a number between 1 and 100'.", function () {
             var message = '';
             try{
                 let obj = new D3Matrix(999);
@@ -60,9 +56,7 @@ describe('D3Matrix', function() {
             }
             assert.equal('N is a number between 1 and 100', message);
         });
-    });
-    context('when create D3Matrix with N is equal 101', function () {
-        it("should throw error with message 'N is a number between 1 and 100'.", function () {
+        it("if N is 101 should throw error with message 'N is a number between 1 and 100'.", function () {
             var message = '';
             try{
                 let obj = new D3Matrix(101);
@@ -72,73 +66,50 @@ describe('D3Matrix', function() {
             assert.equal('N is a number between 1 and 100', message);
         });
     });
-    context('when create D3Matrix with N is equal 1', function () {
-        it("should the cells (1,1,1) to (1,1,1) are  0.", function () {
+    context('when create D3Matrix with N is number between 1 and 100', function () {
+        it("if N is 1 the length of values should be 1", function () {
             var message = '';
-            var obj = undefined;
-            var expected = [];
-            var n = 1;
-            for (var i = 0;  i < n; i++) {
-                expected.push([]);
-                for (var j = 0; j < n; j++) {
-                    expected[i].push([]);
-                    for (var k = 0; k < n; k++) {
-                        expected[i][j].push(0);
-                    }
-                }
-            }
+            var obj = {};
             try{
-                obj = new D3Matrix(n);
+                obj = new D3Matrix(1);
+                message = obj.values.length;
             } catch (e) {
                 message = e.message;
             }
-            assert.equal(JSON.stringify(expected), JSON.stringify(obj.matrix));
+            assert.equal(1, message);
         });
-    });
-    context('when create D3Matrix with N is equal 4', function () {
-        it("should the cells (1,1,1) to (4,4,4) are  0.", function () {
+        it("if N is 2 the length of values should be 8", function () {
             var message = '';
-            var obj = undefined;
-            var expected = [];
-            var n = 4;
-            for (var i = 0;  i < n; i++) {
-                expected.push([]);
-                for (var j = 0; j < n; j++) {
-                    expected[i].push([]);
-                    for (var k = 0; k < n; k++) {
-                        expected[i][j].push(0);
-                    }
-                }
-            }
+            var obj = {};
             try{
-                obj = new D3Matrix(n);
+                obj = new D3Matrix(2);
+                message = obj.values.length;
             } catch (e) {
                 message = e.message;
             }
-            assert.equal(JSON.stringify(expected), JSON.stringify(obj.matrix));
+            assert.equal(8, message);
         });
-    });
-    context('when create D3Matrix with N is equal 100', function () {
-        it("should the cells (1,1,1) to (100,100,100) are  0.", function () {
+        it("if N is 4 the length of values should be 64", function () {
             var message = '';
-            var obj = undefined;
-            var expected = [];
-            var n = 100;
-            for (var i = 0;  i < n; i++) {
-                expected.push([]);
-                for (var j = 0; j < n; j++) {
-                    expected[i].push([]);
-                    for (var k = 0; k < n; k++) {
-                        expected[i][j].push(0);
-                    }
-                }
-            }
+            var obj = {};
             try{
-                obj = new D3Matrix(n);
+                obj = new D3Matrix(4);
+                message = obj.values.length;
             } catch (e) {
                 message = e.message;
             }
-            assert.equal(JSON.stringify(expected), JSON.stringify(obj.matrix));
+            assert.equal(64, message);
+        });
+        it("if N is 100 the length of values should be 100^3", function () {
+            var message = '';
+            var obj = {};
+            try{
+                obj = new D3Matrix(100);
+                message = obj.values.length;
+            } catch (e) {
+                message = e.message;
+            }
+            assert.equal(Math.pow(100, 3), message);
         });
     });
     context('when create D3Matrix with N is equal 4, and update with', function () {
@@ -239,28 +210,117 @@ describe('D3Matrix', function() {
                 assert.equal('Z is a number between 1 and 4', message);
             }
         );
+    });
+    context('when create D3Matrix with N is equal 2', function () {
+        var obj = new D3Matrix(2);
         it(
-            "(1,1,4,100) should the matrix[1][1][4] is equal to 100.",
+            "if run UPDATE 1 1 1 100, the index 0 of values should be equal to 100.",
             function () {
                 var message = '';
                 try{
-                    obj.update(1, 1, 4, 100);
+                    obj.update(1, 1, 1, 100);
+                    message = obj.values[0];
                 } catch (e) {
                     message = e.message;
                 }
-                assert.equal(100, obj.matrix[0][0][3]);
+                assert.equal(100, message);
             }
         );
         it(
-            "(1,4,1,100) should the matrix[0][3][0] is equal to 100.",
+            "if run UPDATE 1 1 2 100, the index 1 of values should be equal to 100.",
             function () {
                 var message = '';
                 try{
-                    obj.update(1, 4, 1, 100);
+                    obj.update(1, 1, 2, 100);
+                    message = obj.values[1];
                 } catch (e) {
                     message = e.message;
                 }
-                assert.equal(100, obj.matrix[0][3][0]);
+                assert.equal(100, message);
+            }
+        );
+        it(
+            "if run UPDATE 1 2 1 100, the index 2 of values should be equal to 100.",
+            function () {
+                var message = '';
+                try{
+                    obj.update(1, 2, 1, 100);
+                    message = obj.values[2];
+                } catch (e) {
+                    message = e.message;
+                }
+                assert.equal(100, message);
+            }
+        );
+        it(
+            "if run UPDATE 2 2 1 100, the index 6 of values should be equal to 100.",
+            function () {
+                var message = '';
+                try{
+                    obj.update(2, 2, 1, 100);
+                    message = obj.values[6];
+                } catch (e) {
+                    message = e.message;
+                }
+                assert.equal(100, message);
+            }
+        );
+        it(
+            "if run UPDATE 2 2 2 100, the index 7 of values should be equal to 100.",
+            function () {
+                var message = '';
+                try{
+                    obj.update(2, 2, 2, 100);
+                    message = obj.values[7];
+                } catch (e) {
+                    message = e.message;
+                }
+                assert.equal(100, message);
+            }
+        );
+    });
+    context('when create D3Matrix with N is equal 1', function () {
+        var obj = new D3Matrix(1);
+        it(
+            "if run UPDATE 1 1 1 100, the index 0 of values should be equal to 100.",
+            function () {
+                var message = '';
+                try{
+                    obj.update(1, 1, 1, 100);
+                    message = obj.values[0];
+                } catch (e) {
+                    message = e.message;
+                }
+                assert.equal(100, message);
+            }
+        );
+    });
+    context('when create D3Matrix with N is equal 4', function () {
+        var obj = new D3Matrix(4);
+        it(
+            "if run UPDATE 4 4 4 100, the index 63 of values should be equal to 100.",
+            function () {
+                var message = '';
+                try{
+                    obj.update(4, 4, 4, 100);
+                    message = obj.values[63];
+                } catch (e) {
+                    message = e.message;
+                }
+                assert.equal(100, message);
+            }
+        );
+        it(
+            "if run UPDATE 4 4 1 100, the index 60 of values should be equal to 100.",
+            function () {
+                var message = '';
+                try{
+                    obj.update(4, 4, 1, 100);
+                    message = obj.values[60];
+                } catch (e) {
+                    message = e.message;
+                }
+                assert.equal(100, message);
             }
         );
     });
@@ -449,12 +509,59 @@ describe('D3Matrix', function() {
             }
         );
     });
+    context('when create D3Matrix with N is equal 2 and UPDATE all elements to 1', function () {
+        var obj = new D3Matrix(2);
+        obj.update(1, 1, 1, 1);
+        obj.update(1, 1, 2, 1);
+        obj.update(1, 2, 1, 1);
+        obj.update(1, 2, 2, 1);
+        obj.update(2, 1, 1, 1);
+        obj.update(2, 1, 2, 1);
+        obj.update(2, 2, 1, 1);
+        obj.update(2, 2, 2, 1);
+        it(
+            "if run QUERY 1 1 1 2 2 2 should be returned 8",
+            function () {
+                var message = '';
+                try{
+                    message = obj.query(1,1,1,2,2,2);
+                } catch (e) {
+                    message = e.message;
+                }
+                assert.equal(8, message);
+            }
+        );
+        it(
+            "if run QUERY 1 2 2 2 2 2 should be returned 5",
+            function () {
+                var message = '';
+                try{
+                    message = obj.query(1,2,2,2,2,2);
+                } catch (e) {
+                    message = e.message;
+                }
+                assert.equal(5, message);
+            }
+        );
+        it(
+            "if run QUERY 2 2 2 2 2 2 should be returned 1",
+            function () {
+                var message = '';
+                try{
+                    message = obj.query(2,2,2,2,2,2);
+                } catch (e) {
+                    message = e.message;
+                }
+                assert.equal(1, message);
+            }
+        );
+    });
     context('when create D3Matrix with N is equal 4', function () {
         context('and run UPDATE 2 2 2 4', function () {
             var obj = new D3Matrix(4);
             obj.update(2,2,2,4);
             it(
-                "and run QUERY 1 1 1 3 3 3 return 4",
+                "and run QUERY 1 1 1 3 3 3 should be returned 4",
                 function () {
                     var message = '';
                     try{
@@ -471,7 +578,7 @@ describe('D3Matrix', function() {
             obj.update(2,2,2,4);
             obj.update(1,1,1,23);
             it(
-                "and run QUERY 2 2 2 4 4 4 return 4",
+                "and run QUERY 2 2 2 4 4 4 should be returned 4",
                 function () {
                     var message = '';
                     try{
@@ -483,7 +590,7 @@ describe('D3Matrix', function() {
                 }
             );
             it(
-                "and run QUERY 1 1 1 3 3 3 return 27",
+                "and run QUERY 1 1 1 3 3 3 should be returned 27",
                 function () {
                     var message = '';
                     try{
@@ -501,7 +608,7 @@ describe('D3Matrix', function() {
             var obj = new D3Matrix(2);
             obj.update(2,2,2,1);
             it(
-                "and run QUERY 1 1 1 1 1 1 return 0",
+                "and run QUERY 1 1 1 1 1 1 should be returned 0",
                 function () {
                     var message = '';
                     try{
@@ -513,7 +620,7 @@ describe('D3Matrix', function() {
                 }
             );
             it(
-                "and run QUERY 1 1 1 2 2 2 return 1",
+                "and run QUERY 1 1 1 2 2 2 should be returned 1",
                 function () {
                     var message = '';
                     try{
@@ -525,7 +632,7 @@ describe('D3Matrix', function() {
                 }
             );
             it(
-                "and run QUERY 2 2 2 2 2 2 return 1",
+                "and run QUERY 2 2 2 2 2 2 should be returned 1",
                 function () {
                     var message = '';
                     try{
