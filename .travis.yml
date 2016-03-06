@@ -14,4 +14,4 @@ node_js:
   - "4.0"
 
 script:
- - npm run-script coverage
+ - npm test
