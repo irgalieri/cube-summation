@@ -25,7 +25,7 @@
 "use strict";
 
 var assert = require('assert')
-    , D3Matrix = require('../lib/d3matrix.js');
+    , D3Matrix = require('../../lib/d3matrix.js');
 
 describe('D3Matrix', function() {
     context('when create D3Matrix with N is number not between  1 and 100', function () {

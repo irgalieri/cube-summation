@@ -25,7 +25,7 @@
 "use strict";
 
 var assert = require('assert')
-    , TestCase = require('../lib/testcase.js');
+    , TestCase = require('../../lib/testcase.js');
 
 describe('TestCase', function() {
     context('when create TestCase', function () {
@@ -262,9 +262,7 @@ describe('TestCase', function() {
                                         testCase.addOperation({method:"QUERY", params:[1,1,1,3,3,3]});
                                         testCase.run(function (result) {
                                             var expected = ['', 4, '', 4, 27];
-                                            for (let i in expected) {
-                                                assert.equal(expected[i], result[i]);
-                                            }
+                                            assert.deepEqual(expected, result);
                                             done();
                                         });
                                     }
@@ -297,9 +295,7 @@ describe('TestCase', function() {
                                         testCase.addOperation({method:"QUERY", params:[2,2,2,2,2,2]});
                                         testCase.run(function (result) {
                                             var expected = ['', 0, 1, 1];
-                                            for (let i in expected) {
-                                                assert.equal(expected[i], result[i]);
-                                            }
+                                            assert.deepEqual(expected, result);
                                             done();
                                         });
                                     }
@@ -370,9 +366,7 @@ describe('TestCase', function() {
                                                 '',
                                                 'X2 is a number between 1 and 1'
                                             ];
-                                            for (var i = 0; i < 2; i++) {
-                                                assert.equal(expected[i], result[i]);
-                                            }
+                                            assert.deepEqual(expected, result);
                                             done();
                                         });
                                     }
@@ -405,9 +399,7 @@ describe('TestCase', function() {
                                             var expected = [
                                                 0
                                             ];
-                                            for (var i = 0; i < 1; i++) {
-                                                assert.equal(expected[i], result[i]);
-                                            }
+                                            assert.deepEqual(expected, result);
                                             done();
                                         });
                                     }
