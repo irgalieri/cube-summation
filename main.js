@@ -27,10 +27,25 @@
 console.info("Cube Summation WebSocket Server");
 console.info("Copyright (C) 2016  Ignacio R. Galieri");
 
+var minify = require('express-minify');
+var express = require('express');
 var app = require('express')();
+var fs = require('fs');
+app.use(minify());
+app.use(express.static(__dirname + '/bower_components'));
 app.use('/', function(req, res) {
     res.setHeader('Content-Type', 'text/html');
-    res.send("FRONTEND HERE");
+    fs.readFile(
+        __dirname + '/views/index.html',
+        function (err, data) {
+            if (err) {
+                res.writeHead(500);
+                return res.end('Error loading index.html');
+            }
+            res.writeHead(200);
+            res.end(data);
+        }
+    );
 });
 var Controller = require('./lib/controller.js');
 var controller = new Controller();
@@ -41,9 +56,10 @@ io.on('connection', function(socket){
     console.log((new Date()) + ' Connection accepted.');
     socket.emit('begin', 'Please inform your type of operation.');
     socket.on('bulk', function(data){
+        data = JSON.parse(data);
         let controller = new Controller();
         controller.bulk(
-            JSON.parse(data),
+            data,
             function (result) {
                 socket.emit('bulk-reponse', JSON.stringify(result));
             }
@@ -81,6 +97,9 @@ io.on('connection', function(socket){
         } catch(e) {
             socket.emit('run-operation-reponse', JSON.stringify(e.message));
         }
+    });
+    socket.on('disconnect', function(data){
+        console.log((new Date()) + ' Connection finish.');
     });
 });
 server.listen(8080);

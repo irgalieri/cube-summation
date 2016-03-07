@@ -1,3 +1,6 @@
+#bower
+/bower_components
+
 /Response.md
 # Logs
 logs

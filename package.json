@@ -30,14 +30,15 @@
     "istanbul": "*",
     "mocha": "*",
     "pre-commit": "^1.1.2",
-    "should": "*",
-    "socket.io-client": "^1.4.5"
+    "should": "*"
   },
   "pre-commit": [
     "coverage"
   ],
   "dependencies": {
     "express": "^4.13.4",
-    "socket.io": "^1.4.5"
+    "socket.io": "^1.4.5",
+    "express-minify": "^0.2.0",
+    "socket.io-client": "^1.4.5"
   }
 }
