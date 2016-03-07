@@ -31,9 +31,13 @@
     "mocha": "*",
     "pre-commit": "^1.1.2",
     "should": "*",
-    "sinon": "*"
+    "socket.io-client": "^1.4.5"
   },
   "pre-commit": [
     "coverage"
-  ]
+  ],
+  "dependencies": {
+    "express": "^4.13.4",
+    "socket.io": "^1.4.5"
+  }
 }
