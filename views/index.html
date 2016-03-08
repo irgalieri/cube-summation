@@ -161,12 +161,20 @@
          * @return {void}
          */
         function onT (socket, command, cursor, callback) {
-            var error = false;
-            var message = 'Enter matrix size and numbers operations (N M):';
-            cursor.limitTestCase = command;
-            cursor.currentStep++;
-            cursor.actualTest = 0;
-            callback(error, message);
+            socket.emit('create-case', command);
+            socket.removeAllListeners('create-case-reponse');
+            socket.on('create-case-reponse', function(response){
+                if (response == 'OK') {
+                    var error = false;
+                    var message = 'Enter matrix size and numbers operations (N M):';
+                    cursor.limitTestCase = command;
+                    cursor.currentStep++;
+                    cursor.actualTest = 0;
+                    callback(error, message);
+                } else {
+                    callback(true, response);
+                }
+            });
         }
         /**
          * OnNM
@@ -179,17 +187,28 @@
          * @return {void}
          */
         function onNM (socket, command, cursor, callback) {
-            var error = false;
             command = command.split(' ');
-            cursor.actualTest++;
-            cursor.limitOperations = command[1];
-            cursor.actualOperation = 0;
-            var message = 'Entrer Operation #'+(cursor.actualOperation + 1)+':';
+            socket.emit(
+                'prepare-test',
+                JSON.stringify({matrixSize:command[0],numberOperations:command[1]})
+            );
+            socket.removeAllListeners('prepare-test-reponse');
+            socket.on('prepare-test-reponse', function(response){
+                if (response == 'Please Add Operations') {
+                    var error = false;
+                    cursor.actualTest++;
+                    cursor.limitOperations = command[1];
+                    cursor.actualOperation = 0;
+                    var message = 'Entrer Operation #'+(cursor.actualOperation + 1)+':';
 
-            if (cursor.actualTest <= cursor.limitTestCase) {
-                cursor.currentStep = 2;
-            }
-            callback(error, message);
+                    if (cursor.actualTest <= cursor.limitTestCase) {
+                        cursor.currentStep = 2;
+                    }
+                    callback(error, message);
+                } else {
+                    callback(true, response);
+                }
+            });
         }
         /**
          * OnUpdate
@@ -202,19 +221,35 @@
          * @return {void}
          */
         function onUpdate (socket, command, cursor, callback) {
-            var error = false;
-            cursor.actualOperation++;
-            var message = 'Entrer Operation #'+(cursor.actualOperation + 1)+':';
+            command = command.replace('UPDATE ', '');
+            command = command.split(' ');
+            var op = {
+                method: 'UPDATE',
+                params: command
+            };
+            socket.emit('run-operation', JSON.stringify(op));
+            socket.removeAllListeners('run-operation-reponse');
+            socket.on('run-operation-reponse', function(response){
+                response = JSON.parse(response);
+                var output = response[0];
+                if (output === '') {
+                    var error = false;
+                    cursor.actualOperation++;
+                    var message = 'Entrer Operation #'+(cursor.actualOperation + 1)+':';
 
-            if (cursor.actualOperation >= cursor.limitOperations) {
-                message = 'Enter matrix size and numbers operations (N M):';
-                cursor.currentStep = 1;
-                if (cursor.actualTest >= cursor.limitTestCase) {
-                    message = 'Enter the number of test cases (T):';
-                    cursor.currentStep = 3;
+                    if (cursor.actualOperation >= cursor.limitOperations) {
+                        message = 'Enter matrix size and numbers operations (N M):';
+                        cursor.currentStep = 1;
+                        if (cursor.actualTest >= cursor.limitTestCase) {
+                            message = 'Enter the number of test cases (T):';
+                            cursor.currentStep = 3;
+                        }
+                    }
+                    callback(error, message);
+                } else {
+                    callback(true, response);
                 }
-            }
-            callback(error, message);
+            });
         }
         /**
          * OnQuery
@@ -227,20 +262,35 @@
          * @return {void}
          */
         function onQuery (socket, command, cursor, callback) {
-            var error = false;
-            cursor.actualOperation++;
-            cursor.actualOperation++;
-            var message = 'Entrer Operation #'+(cursor.actualOperation + 1)+':';
+            command = command.replace('QUERY ', '');
+            command = command.split(' ');
+            var op = {
+                method: 'QUERY',
+                params: command
+            };
+            socket.emit('run-operation', JSON.stringify(op));
+            socket.removeAllListeners('run-operation-reponse');
+            socket.on('run-operation-reponse', function(response){
+                response = JSON.parse(response);
+                var output = response[0];
+                if (Number.isInteger(output)) {
+                    var error = false;
+                    cursor.actualOperation++;
+                    var message = 'Entrer Operation #'+(cursor.actualOperation + 1)+':';
 
-            if (cursor.actualOperation >= cursor.limitOperations) {
-                message = 'Enter matrix size and numbers operations (N M):';
-                cursor.currentStep = 1;
-                if (cursor.actualTest > cursor.limitTestCase) {
-                    message = 'Enter the number of test cases (T):';
-                    cursor.currentStep = 3;
+                    if (cursor.actualOperation >= cursor.limitOperations) {
+                        message = 'Enter matrix size and numbers operations (N M):';
+                        cursor.currentStep = 1;
+                        if (cursor.actualTest >= cursor.limitTestCase) {
+                            message = 'Enter the number of test cases (T):';
+                            cursor.currentStep = 0;
+                        }
+                    }
+                    callback(error, message, output);
+                } else {
+                    callback(true, response);
                 }
-            }
-            callback(error, message);
+            });
         }
         /**
          * onOperation
@@ -368,20 +418,19 @@
                                             socket,
                                             command,
                                             cursor,
-                                            function (error, message) {
-                                                console.log(cursor);
+                                            function (error, message, output) {
+                                                if (output !== undefined) {
+                                                    term.echo('[[b;green;black]'+output+']');
+                                                }
                                                 if (!error) {
                                                     currentOrden = message;
                                                     term.echo(new String(message));
                                                 } else {
-                                                    term.error(new String(usage));
+                                                    term.error(new String(message));
                                                 }
                                             }
                                         );
                                         term.resume();
-                                        if (cursor.currentStep === 3) {
-                                            cursor.currentStep = 0;
-                                        }
                                     } else {
                                         var usage = "The command '"+command.trim()+"' not is allowed, type 'help' for help.";
                                         term.error(new String(usage));
