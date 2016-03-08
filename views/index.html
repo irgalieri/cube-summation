@@ -35,7 +35,7 @@
                               <div class="form-group">
                                 <label for="bulk-input" class="col-sm-1 control-label">Input:</label>
                                 <div class="col-sm-5">
-                                    <textarea id="bulk-input" class="form-control" rows="3" height="60px">
+                                    <textarea id="bulk-input" class="form-control" rows="3" style="height: 250px;">
   2
   4 5
   UPDATE 2 2 2 4
@@ -54,7 +54,7 @@
                               <div class="form-group">
                                 <label for="bulk-output" class="col-sm-1 control-label">Output:</label>
                                 <div class="col-sm-5">
-                                    <textarea id="bulk-output" class="form-control" rows="3" height="60px"></textarea>
+                                    <textarea id="bulk-output" class="form-control" rows="3" style="height: 250px;" disabled=""></textarea>
                                 </div>
                               </div>
                           </form>
@@ -75,6 +75,191 @@
         <script src="/socket.io/socket.io.js"></script>
         <script src="/jquery.terminal/js/jquery.terminal-min.js"></script>
         <script>
+        /**
+         * GetUsage
+         *
+         * @param  {Term}   term    Terminal Object
+         * @param  {String} message Message to Print
+         *
+         * @return void
+         */
+        function getUsage ( term, message ) {
+            var usage = 'Usage: <T> | <N> <M> | UPDATE <X> <Y> <Z> <W> | QUERY <X1> <Y1> <Z1> <X2> <Y2> <Z2>\n';
+            usage += ' \n';
+            usage += 'Constrains \n';
+            usage += '1 <= T <= 50 \n';
+            usage += '1 <= N <= 100 \n';
+            usage += '1 <= M <= 1000 \n';
+            usage += '1 <= x1 <= x2 <= N  \n';
+            usage += '1 <= y1 <= y2 <= N  \n';
+            usage += '1 <= z1 <= z2 <= N  \n';
+            usage += '1 <= x,y,z <= N   \n';
+            usage += '-10^9 <= W <= 10^9   \n';
+            usage += ' \n';
+            usage += ' \n';
+            usage += message + '\n';
+            term.echo(new String(usage));
+        }
+        /**
+         * ValidateT
+         *
+         * @param  {String} t command
+         *
+         * @return {Boolean}
+         */
+        function validateT (t) {
+            return t.match(/^\d+$/);
+        }
+        /**
+         * ValidateNM
+         *
+         * @param  {String} t command
+         *
+         * @return {Boolean}
+         */
+        function validateNM (t) {
+            return t.match(/^\d+ \d+$/);
+        }
+        /**
+         * ValidateUpdate
+         *
+         * @param  {String} t command
+         *
+         * @return {Boolean}
+         */
+        function validateUpdate (t) {
+            return t.match(/^UPDATE \d+ \d+ \d+ -?\d+$/);
+        }
+        /**
+         * ValidateQuery
+         *
+         * @param  {String} t command
+         *
+         * @return {Boolean}
+         */
+        function validateQuery (t) {
+            return t.match(/^QUERY \d+ \d+ \d+ \d+ \d+ \d+$/);
+        }
+        /**
+         * ValidateOperation
+         *
+         * @param  {String} t command
+         *
+         * @return {Boolean}
+         */
+        function validateOperation (t) {
+            return (validateUpdate(t) || validateQuery(t));
+        }
+        /**
+         * OnT
+         *
+         * @param  {Socket.IO} socket   Socket.IO Client
+         * @param  {String}    command  Command
+         * @param  {Object}    cursor   Cursor
+         * @param  {Function}  callback Callback
+         *
+         * @return {void}
+         */
+        function onT (socket, command, cursor, callback) {
+            var error = false;
+            var message = 'Enter matrix size and numbers operations (N M):';
+            cursor.limitTestCase = command;
+            cursor.currentStep++;
+            cursor.actualTest = 0;
+            callback(error, message);
+        }
+        /**
+         * OnNM
+         *
+         * @param  {Socket.IO} socket   Socket.IO Client
+         * @param  {String}    command  Command
+         * @param  {Object}    cursor   Cursor
+         * @param  {Function}  callback Callback
+         *
+         * @return {void}
+         */
+        function onNM (socket, command, cursor, callback) {
+            var error = false;
+            command = command.split(' ');
+            cursor.actualTest++;
+            cursor.limitOperations = command[1];
+            cursor.actualOperation = 0;
+            var message = 'Entrer Operation #'+(cursor.actualOperation + 1)+':';
+
+            if (cursor.actualTest <= cursor.limitTestCase) {
+                cursor.currentStep = 2;
+            }
+            callback(error, message);
+        }
+        /**
+         * OnUpdate
+         *
+         * @param  {Socket.IO} socket   Socket.IO Client
+         * @param  {String}    command  Command
+         * @param  {Object}    cursor   Cursor
+         * @param  {Function}  callback Callback
+         *
+         * @return {void}
+         */
+        function onUpdate (socket, command, cursor, callback) {
+            var error = false;
+            cursor.actualOperation++;
+            var message = 'Entrer Operation #'+(cursor.actualOperation + 1)+':';
+
+            if (cursor.actualOperation >= cursor.limitOperations) {
+                message = 'Enter matrix size and numbers operations (N M):';
+                cursor.currentStep = 1;
+                if (cursor.actualTest >= cursor.limitTestCase) {
+                    message = 'Enter the number of test cases (T):';
+                    cursor.currentStep = 3;
+                }
+            }
+            callback(error, message);
+        }
+        /**
+         * OnQuery
+         *
+         * @param  {Socket.IO} socket   Socket.IO Client
+         * @param  {String}    command  Command
+         * @param  {Object}    cursor   Cursor
+         * @param  {Function}  callback Callback
+         *
+         * @return {void}
+         */
+        function onQuery (socket, command, cursor, callback) {
+            var error = false;
+            cursor.actualOperation++;
+            cursor.actualOperation++;
+            var message = 'Entrer Operation #'+(cursor.actualOperation + 1)+':';
+
+            if (cursor.actualOperation >= cursor.limitOperations) {
+                message = 'Enter matrix size and numbers operations (N M):';
+                cursor.currentStep = 1;
+                if (cursor.actualTest > cursor.limitTestCase) {
+                    message = 'Enter the number of test cases (T):';
+                    cursor.currentStep = 3;
+                }
+            }
+            callback(error, message);
+        }
+        /**
+         * onOperation
+         *
+         * @param  {Socket.IO} socket   Socket.IO Client
+         * @param  {String}    command  Command
+         * @param  {Object}    cursor   Cursor
+         * @param  {Function}  callback Callback
+         *
+         * @return {void}
+         */
+        function onOperation (socket, command, cursor, callback) {
+            if (validateUpdate(command)) {
+                onUpdate(socket, command, cursor, callback)
+            } else {
+                onQuery(socket, command, cursor, callback)
+            }
+        }
+
         jQuery(function($, undefined) {
             "use strict";
             var options ={
@@ -108,10 +293,10 @@
                                 return;
                             }
                             value = value.trim();
-                            if (value.match(/^\d$/)) {
+                            if (validateT(value)) {
                                 sizeTest = value;
                                 obj.testCases = [];
-                            } else if (value.match(/^\d \d$/)) {
+                            } else if (validateNM(value)) {
                                 actualTest++;
                                 value = value.split(' ');
                                 var t = {
@@ -120,7 +305,7 @@
                                 };
                                 obj.testCases.push(t);
                                 sizeOperation = value[1];
-                            } else if (value.match(/^UPDATE \d+ \d+ \d+ \d+$/)) {
+                            } else if (validateUpdate(value)) {
                                 value = value.replace('UPDATE ', '');
                                 value = value.split(' ');
                                 var op = {
@@ -132,7 +317,7 @@
                                     alert('Exceeds the number of operations');
                                     error = true;
                                 }
-                            } else if (value.match(/^QUERY \d+ \d+ \d+ \d+ \d+ \d+$/)) {
+                            } else if (validateQuery(value)) {
                                 value = value.replace('QUERY ', '');
                                 value = value.split(' ');
                                 var op = {
@@ -157,15 +342,51 @@
                             socket.emit('bulk', JSON.stringify(obj));
                         }
                     });
+                    var currentOrden = 'Enter the number of test cases (T): ';
+                    var steps = [
+                        { validate: validateT, doIt: onT},
+                        { validate: validateNM, doIt: onNM},
+                        { validate: validateOperation, doIt: onOperation}
+                    ];
+                    var cursor = {
+                        currentStep: 0,
+                        limitTestCase: 0,
+                        limitOperations: 0,
+                        actualTest: 0,
+                        actualOperation: 0
+                    };
                     $('#term').terminal(
                         function(command, term) {
+                            command = command.trim();
                             if (command !== '') {
                                 try {
-                                    var result = window.eval(command);
-                                    if (result !== undefined) {
-                                        term.echo(new String(result));
+                                    if (command.match(/^help$/)) {
+                                        getUsage(term, currentOrden);
+                                    } else if (steps[cursor.currentStep].validate(command)) {
+                                        term.pause();
+                                        steps[cursor.currentStep].doIt(
+                                            socket,
+                                            command,
+                                            cursor,
+                                            function (error, message) {
+                                                console.log(cursor);
+                                                if (!error) {
+                                                    currentOrden = message;
+                                                    term.echo(new String(message));
+                                                } else {
+                                                    term.error(new String(usage));
+                                                }
+                                            }
+                                        );
+                                        term.resume();
+                                        if (cursor.currentStep === 3) {
+                                            cursor.currentStep = 0;
+                                        }
+                                    } else {
+                                        var usage = "The command '"+command.trim()+"' not is allowed, type 'help' for help.";
+                                        term.error(new String(usage));
                                     }
-                                } catch(e) {
+                                } catch (e) {
                                     term.error(new String(e));
                                 }
                             } else {
@@ -173,10 +394,18 @@
                             }
                         },
                         {
-                            greetings: data,
+                            greetings: null,
+                            onInit: function(term) {
+                                term.echo('[[bu;green;black]Cube Summation Terminal]');
+                                term.echo(
+                                  'Ignacio R. Galieri (C) 2016\n'+
+                                  'any time type "help" for more information. \n \n'+
+                                  currentOrden
+                                );
+                            },
                             name: 'cube-summation',
-                            height: 400,
-                            prompt: 'I.R.G. $> '
+                            height: 300,
+                            prompt: ''
                         }
                     );
                 });
