@@ -5,8 +5,29 @@ Cube Summation
 
 This is my own resolution of [HackerRank - Cube Summation](https://www.hackerrank.com/challenges/cube-summation).
 
+Requirements
+------------
+
+-	[Vagrant](https://www.vagrantup.com/docs/installation/)
+
 Usage
 -----
+
+### Start Project
+
+```bash
+$> git clone git@github.com:irgalieri/cube-summation.git
+$> cd cube-summation.git
+$> vagrant up
+```
+
+The open your browser http://127.0.0.1:8080
+
+### Shutdown Project
+
+```bash
+$> vagrant halt
+```
 
 License
 -------

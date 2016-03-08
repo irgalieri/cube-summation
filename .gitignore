@@ -1,3 +1,6 @@
+#vagrant
+.vagrant
+
 #bower
 /bower_components
 
